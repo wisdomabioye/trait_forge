@@ -1,10 +1,10 @@
-# 🧰 Trait Image Exporter & WASM Previewer
+# 🧰 Trait Image Exporter & HTML Previewer
 
 This is a lightweight tool to help artists and developers generate trait metadata for generative art projects.
 It includes:
 
 * 🦀 A **Rust CLI tool** to traverse trait folders and generate a JSON file
-* 🌐 A **WASM-powered HTML previewer** to visually combine and preview the trait layers
+* 🌐 A **HTML previewer** to visually combine and preview arts generated from traits.
 
 ---
 
