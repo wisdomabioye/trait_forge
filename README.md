@@ -42,15 +42,15 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ### 2. Clone and build the tool
 
 ```bash
-git clone https://github.com/your-username/trait-tool.git
-cd trait-tool
+git clone https://github.com/your-username/trait_forge.git
+cd trait_forge
 cargo build --release
 ```
 
 ### 3. Run the tool
 
 ```bash
-./target/release/trait-tool \
+./target/release/trait_forge \
   --path ./traits \
   --output ./traits.json \
   --format base64   # or 'raw' for inline svg
