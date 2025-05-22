@@ -58,23 +58,14 @@ cargo build --release
 
 ---
 
-## 🌐 Step 2: Preview with WASM
+## 🌐 Step 2: Preview with the traits.json
 
-### 1. Install dependencies
-
-```bash
-cargo install wasm-pack
-rustup target add wasm32-unknown-unknown
-```
-
-### 2. Build the WASM module
+### 1. Change directory
 
 ```bash
-cd previewer
-wasm-pack build --target web --out-dir ./pkg
+cd web
 ```
-
-### 3. Open the previewer
+### 2. Open the previewer
 
 You can simply open `index.html` in your browser:
 
@@ -84,10 +75,10 @@ xdg-open index.html  # Linux
 start index.html  # Windows
 ```
 
-### 4. Use the previewer
+### 3. Use the previewer
 
 * Upload `traits.json`
-* Click **Randomize** to generate random combinations visually
+* Click **Generate** to generate combinations visually
 
 ---
 
