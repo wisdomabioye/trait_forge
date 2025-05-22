@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trait Preview Generator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 1rem;
+    }
+    canvas {
+      border: 1px solid #ccc;
+    }
+    .thumbnail {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      margin: 2px;
+    }
+    .combo-preview {
+      display: inline-block;
+      margin: 10px;
+    }
+    .dropzone {
+      border: 2px dashed #ccc;
+      padding: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Trait Forge Preview</h1>
+  <div class="dropzone" id="dropzone">Drop your traits.json file here or click to upload</div>
+  <input type="file" id="upload" accept="application/json" style="display:none" />
+
+  <label for="count">Generate how many unique images?</label>
+  <select id="count"></select>
+  <button id="generate">Generate</button>
+
+  <div id="output-grid"></div>
+
+  <script>
+    let traits = {};
+    let usedCombinations = new Set();
+
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('upload');
+
+    dropzone.addEventListener('click', () => fileInput.click());
+    dropzone.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropzone.style.borderColor = 'green';
+    });
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.style.borderColor = '#ccc';
+    });
+    dropzone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropzone.style.borderColor = '#ccc';
+      const file = e.dataTransfer.files[0];
+      if (file) loadJsonFile(file);
+    });
+
+    fileInput.addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (file) loadJsonFile(file);
+    });
+
+    function loadJsonFile(file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        traits = JSON.parse(event.target.result);
+      };
+      reader.readAsText(file);
+    }
+
+    const countSelect = document.getElementById('count');
+    for (let i = 10; i <= 1000; i += 10) {
+      const option = document.createElement('option');
+      option.value = i;
+      option.textContent = i;
+      countSelect.appendChild(option);
+    }
+
+    document.getElementById('generate').addEventListener('click', async () => {
+      const count = parseInt(countSelect.value);
+      const grid = document.getElementById('output-grid');
+      grid.innerHTML = '';
+      usedCombinations.clear();
+
+      let attempts = 0;
+      let generated = 0;
+      while (generated < count && attempts < count * 10) {
+        attempts++;
+        const combination = {};
+        const traitKeys = Object.keys(traits);
+
+        for (const key of traitKeys) {
+          const items = traits[key];
+          const item = items[Math.floor(Math.random() * items.length)];
+          combination[key] = item;
+        }
+
+        const comboKey = JSON.stringify(Object.entries(combination).map(([k, v]) => `${k}:${v.filename}`).sort());
+        if (usedCombinations.has(comboKey)) continue;
+
+        usedCombinations.add(comboKey);
+        const canvas = document.createElement('canvas');
+        canvas.width = 300;
+        canvas.height = 300;
+        const ctx = canvas.getContext('2d');
+
+        for (const key of traitKeys) {
+          await drawLayer(ctx, combination[key].data, canvas);
+        }
+
+        const preview = document.createElement('div');
+        preview.className = 'combo-preview';
+        preview.appendChild(canvas);
+
+        const thumbs = document.createElement('div');
+        for (const key of traitKeys) {
+          const thumb = new Image();
+          thumb.className = 'thumbnail';
+          if (combination[key].data.startsWith('<svg')) {
+            const svgBlob = new Blob([combination[key].data], { type: 'image/svg+xml' });
+            thumb.src = URL.createObjectURL(svgBlob);
+          } else {
+            thumb.src = combination[key].data;
+          }
+          thumb.title = `${key}: ${combination[key].name}`;
+          thumbs.appendChild(thumb);
+        }
+
+        preview.appendChild(thumbs);
+        grid.appendChild(preview);
+        generated++;
+      }
+    });
+
+    async function drawLayer(ctx, data, canvas) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve();
+        };
+        if (data.startsWith('<svg')) {
+          const svgBlob = new Blob([data], { type: 'image/svg+xml' });
+          img.src = URL.createObjectURL(svgBlob);
+        } else {
+          img.src = data;
+        }
+      });
+    }
+  </script>
+</body>
+</html>
