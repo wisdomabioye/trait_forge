@@ -32,12 +32,13 @@ enum ImageFormat {
 struct Trait {
     name: String,
     filename: String,
+    mimi_type: String,
     data: String,
     rarity: f32,
     order: u32,
 }
 
-const SUPPORTED_EXTENSIONS: [&str; 5] = ["svg", "png", "jpg", "jpeg", "webp"];
+const SUPPORTED_EXTENSIONS: [&str; 6] = ["svg", "png", "jpg", "gif", "jpeg", "webp"];
 
 fn process_traits_directory(args: &Args, traits_map: &mut BTreeMap<String, Vec<Trait>>) -> Result<()> {
     for entry in fs::read_dir(&args.path)? {
@@ -80,11 +81,12 @@ fn process_trait_file(
     let filename: String = path.file_name().unwrap().to_string_lossy().to_string();
     let stem: std::borrow::Cow<'_, str> = path.file_stem().unwrap().to_string_lossy();
     let (name, rarity) = parse_name_and_rarity(&stem);
-    let data: String = read_file_data(&path, args.format, &extension)?;
+    let (data, mimi_type) = read_file_data(&path, args.format, &extension)?;
 
     let trait_obj: Trait = Trait {
         name,
         filename,
+        mimi_type,
         data,
         rarity,
         order: *order,
@@ -96,15 +98,15 @@ fn process_trait_file(
     Ok(())
 }
 
-fn read_file_data(path: &PathBuf, format: ImageFormat, extension: &str) -> Result<String> {
+fn read_file_data(path: &PathBuf, format: ImageFormat, extension: &str) -> Result<(String, String)> {
     if format == ImageFormat::Raw && extension == "svg" {
-        return Ok(fs::read_to_string(path)?);
+        return Ok((fs::read_to_string(path)?, "image/svg".to_string()));
     }
 
     let bytes: Vec<u8> = fs::read(path)?;
     let mime_type: mime_guess::Mime = MimeGuess::from_path(path).first_or_octet_stream();
     let encoded: String = general_purpose::STANDARD.encode(&bytes);
-    Ok(format!("data:{};base64,{}", mime_type, encoded))
+    Ok((format!("data:{};base64,{}", mime_type, encoded), mime_type.to_string()))
 }
 
 fn save_output(output_path: &str, traits_map: &BTreeMap<String, Vec<Trait>>) -> Result<()> {
