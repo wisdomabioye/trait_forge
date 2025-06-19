@@ -32,7 +32,7 @@ enum ImageFormat {
 struct Trait {
     name: String,
     filename: String,
-    mimi_type: String,
+    mime_type: String,
     data: String,
     rarity: f32,
     order: u32,
@@ -81,12 +81,12 @@ fn process_trait_file(
     let filename: String = path.file_name().unwrap().to_string_lossy().to_string();
     let stem: std::borrow::Cow<'_, str> = path.file_stem().unwrap().to_string_lossy();
     let (name, rarity) = parse_name_and_rarity(&stem);
-    let (data, mimi_type) = read_file_data(&path, args.format, &extension)?;
+    let (data, mime_type) = read_file_data(&path, args.format, &extension)?;
 
     let trait_obj: Trait = Trait {
         name,
         filename,
-        mimi_type,
+        mime_type,
         data,
         rarity,
         order: *order,
