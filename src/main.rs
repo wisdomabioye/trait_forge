@@ -48,14 +48,20 @@ fn process_traits_directory(args: &Args, traits_map: &mut BTreeMap<String, Vec<T
         }
 
         let category: String = folder.file_name().into_string().unwrap();
-        let mut order: u32 = 1;
+        // Extract leading number as order (defaults to 1 if not found)
+        let order: u32 = category
+            .chars()
+            .take_while(|c| c.is_digit(10))
+            .collect::<String>()
+            .parse()
+            .unwrap_or(1);
 
         for file in WalkDir::new(folder.path())
             .into_iter()
             .flatten()
             .filter(|e| e.file_type().is_file())
         {
-            process_trait_file(args, traits_map, &category, &mut order, file.path().to_path_buf())?;
+            process_trait_file(args, traits_map, &category, order, file.path().to_path_buf())?;
         }
     }
     Ok(())
@@ -65,7 +71,8 @@ fn process_trait_file(
     args: &Args,
     traits_map: &mut BTreeMap<String, Vec<Trait>>,
     category: &str,
-    order: &mut u32,
+    // order: &mut u32,
+    order: u32,
     path: PathBuf,
 ) -> Result<()> {
     let extension: String = path
@@ -89,11 +96,11 @@ fn process_trait_file(
         mime_type,
         data,
         rarity,
-        order: *order,
+        order,
     };
 
     traits_map.entry(category.to_string()).or_default().push(trait_obj);
-    *order += 1;
+    // *order += 1;
 
     Ok(())
 }

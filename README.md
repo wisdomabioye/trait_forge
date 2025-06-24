@@ -49,12 +49,28 @@ cargo build --release
 
 ### 3. Run the tool
 
+
 ```bash
 ./target/release/trait_forge \
   --path ./traits \
   --output ./traits.json \
   --format base64   # or 'raw' for inline svg
 ```
+
+
+Please note: Each layer folder in `./traits` folder must begin with a number. Example below
+
+```
+01Background
+02Body
+03Clothes
+04Eyes
+05Mouth
+06Head
+
+and so on
+```
+
 
 ---
 
