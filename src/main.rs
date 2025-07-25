@@ -38,7 +38,7 @@ struct Trait {
     order: u32,
 }
 
-const SUPPORTED_EXTENSIONS: [&str; 6] = ["svg", "png", "jpg", "gif", "jpeg", "webp"];
+const SUPPORTED_EXTENSIONS: [&str; 7] = ["svg", "png", "jpg", "gif", "jpeg", "webp", "avif"];
 
 fn process_traits_directory(args: &Args, traits_map: &mut BTreeMap<String, Vec<Trait>>) -> Result<()> {
     for entry in fs::read_dir(&args.path)? {
