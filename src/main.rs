@@ -38,7 +38,7 @@ struct Trait {
     order: u32,
 }
 
-const SUPPORTED_EXTENSIONS: [&str; 7] = ["svg", "png", "jpg", "gif", "jpeg", "webp", "avif"];
+const SUPPORTED_EXTENSIONS: [&str; 8] = ["svg", "png", "jpg", "gif", "jpeg", "webp", "avif", "html"];
 
 fn process_traits_directory(args: &Args, traits_map: &mut BTreeMap<String, Vec<Trait>>) -> Result<()> {
     for entry in fs::read_dir(&args.path)? {
@@ -105,9 +105,11 @@ fn process_trait_file(
     Ok(())
 }
 
-fn read_file_data(path: &PathBuf, format: ImageFormat, extension: &str) -> Result<(String, String)> {
-    if format == ImageFormat::Raw && extension == "svg" {
+fn read_file_data(path: &PathBuf, _format: ImageFormat, extension: &str) -> Result<(String, String)> {
+    if /* format == ImageFormat::Raw && */ extension == "svg" {
         return Ok((fs::read_to_string(path)?, "image/svg".to_string()));
+    } else if extension == "html" {
+        return Ok((fs::read_to_string(path)?, "text/html".to_string()));
     }
 
     let bytes: Vec<u8> = fs::read(path)?;
